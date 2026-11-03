@@ -23,7 +23,17 @@ As a user, I want to have a pet to interact with, like feeding, playing, healing
 As a user, I want to check the status of my pet, with hunger, happiness, health so that in case I need to feed,play or heal my pet
 ### User Story 3
 As a user, I want to access virtual store so that I can buy stuffs with rewarded coins for my pet 
-(Add additional user stories as needed.)
+### User Story 4
+As a user, I want to see my spending summary by category so that I can understand where my money goes and check how much money I have left before reaching my budget
+### User Story 5
+As a user, I want to get rewarded coins if me is under the daily budget limit
+### User Story 6
+As a user, I want my pet’s condition to change over time, so I can come back and take care of it.
+
+
+### User Story 7
+As a user, I want to name and customize my pet, such as its appearance or accessories so that it feel like I have a real my own pet
+### User Story 8
 ---
 ## Use Cases
 ### Use Case 1
@@ -44,9 +54,12 @@ Record Transaction
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Name | Use Case |
-| Name | Use Case |
-| Name | Use Case |
+| Name | Record Transaction |
+| Name | Set Budget |
+| Name | View Budget Progress |
+| Name | Earn Reward Coins |
+| Name | Purchase Pet Items |
+| Name | Interact with Pet |
 ---
 ## Entities
 ### Entity 1
@@ -75,5 +88,7 @@ Pet
 ---
 ## Notes
 [Any additional project information.]
+
+
 
 
