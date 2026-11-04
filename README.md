@@ -68,13 +68,14 @@ Record Transaction
 Pet
 ### Entity 2
 Transaction
-###Entity3
+### Entity3
 Budget
-###Entity4
+### Entity4
 Wallet
-##Entity5
+### Entity5
 Item
-(Add additional entities as needed.)
+# (Add additional entities as needed.)
+
 ---
 ## API Usage
 **API Name:**
