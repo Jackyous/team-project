@@ -3,19 +3,23 @@
 # Project Name
 virtual-pet life simulation with personal finance management 
 ## Team Information
+A great team
 ### Team Members
 - Zhou Wai Hin Jacky
 - Tom Yeh
 - Hyunwoo
 - Jackson Falk 
 ---
+
 ## Project Description
 virtual-pet life simulation with personal finance management
+
 ### Domain
 Domain: Personal Finance / Gamification / Virtual Pet Simulation
 Our application combines personal finance management with a virtual pet simulation game. Users can track their income and expenses, set budget limits, and monitor their spending habits. By staying within their budgets, users can earn virtual coins to purchase items and take care of their pets. The goal is to make personal finance management more engaging and enjoyable through gamification.
 
 ---
+
 ## User Stories
 ### User Story 1
 As a user, I want to have a pet to interact with, like feeding, playing, healing so that I could have joy with it
@@ -29,11 +33,9 @@ As a user, I want to see my spending summary by category so that I can understan
 As a user, I want to get rewarded coins if me is under the daily budget limit
 ### User Story 6
 As a user, I want my pet’s condition to change over time, so I can come back and take care of it.
-
-
 ### User Story 7
 As a user, I want to name and customize my pet, such as its appearance or accessories so that it feel like I have a real my own pet
-### User Story 8
+
 ---
 ## Use Cases
 ### Use Case 1
