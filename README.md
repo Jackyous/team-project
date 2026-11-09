@@ -60,8 +60,8 @@ Record Transaction
 | Name | Set Budget |
 | Name | View Budget Progress |
 | Name | Earn Reward Coins |
-| Name | Purchase Pet Items |
-| Name | Interact with Pet |
+| Tang Yeh (Tom) | Purchase Pet Items (if time allows) |
+| Tang Yeh (Tom) | Interact with Pet |
 ---
 ## Entities
 ### Entity 1
