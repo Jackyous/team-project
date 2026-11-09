@@ -41,7 +41,7 @@ As a user, I want to name and customize my pet, such as its appearance or access
 ### Use Case 1
 Record Transaction
 ### Use Case 2
-	Set Budget
+	Set Budget and Balance
 ### Use Case 3
 	View Budget Progress
 ### Use Case 4
@@ -57,7 +57,7 @@ Record Transaction
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Hyunwoo Nam | Record Transaction |
-| Jackson Falk | Set Budget |
+| Jackson Falk | Set Budget and Balance|
 | Hyunwoo Nam | View Budget Progress |
 | Zhou Wai Hin Jacky | Earn Reward Coins |
 | Tang Yeh (Tom) | Purchase Pet Items (if time allows) |
