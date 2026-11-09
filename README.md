@@ -81,6 +81,14 @@ Item
 **API Name:** Sign in with Google
 **Documentation:** [Sign in with Google](https://developers.google.com/identity/siwg)
 **How it is used in the program:** We will have this as an alternate sign-in option
+
+**API Name:** Dog Api
+**Documentation:** [Dog API] (https://dog.ceo/dog-api/)
+**How it is used in the program:** Give picture for user to choose the desired dog
+
+**API Name:** CATTAS
+**Documentation:** [CATTAS] (https://dog.ceo/dog-api/](https://cataas.com/)
+**How it is used in the program:** Give picture for user to choose the desired cat
 ---
 ## Design Diagrams
 ### UML Class Diagram
