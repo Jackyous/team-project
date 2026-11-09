@@ -90,6 +90,10 @@ Item
 **Documentation:** [CATTAS] (https://cataas.com/)
 **How it is used in the program:** (Give picture for user to choose the desired cat)
 
+**API Name:** World Time API
+**Documentation:** https://timeapi.world/
+**How it is used in the program:** (Give reliable time zone helping measuring in reward system)
+
 ---
 ## Design Diagrams
 ### UML Class Diagram
