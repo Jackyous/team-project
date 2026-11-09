@@ -56,10 +56,10 @@ Record Transaction
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Name | Record Transaction |
-| Name | Set Budget |
-| Name | View Budget Progress |
-| Name | Earn Reward Coins |
+| Hyunwoo Nam | Record Transaction |
+| Jackson Falk | Set Budget |
+| Hyunwoo Nam | View Budget Progress |
+| Zhou Wai Hin Jacky | Earn Reward Coins |
 | Tang Yeh (Tom) | Purchase Pet Items (if time allows) |
 | Tang Yeh (Tom) | Interact with Pet |
 ---
