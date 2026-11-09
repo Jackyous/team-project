@@ -78,9 +78,9 @@ Item
 
 ---
 ## API Usage
-**API Name:**
-**Documentation:** [Link]
-**How it is used in the program:**
+**API Name:** Sign in with Google
+**Documentation:** [Sign in with Google](https://developers.google.com/identity/siwg)
+**How it is used in the program:** We will have this as an alternate sign-in option
 ---
 ## Design Diagrams
 ### UML Class Diagram
