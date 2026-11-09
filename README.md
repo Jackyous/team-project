@@ -6,8 +6,8 @@ virtual-pet life simulation with personal finance management
 A great team
 ### Team Members
 - Zhou Wai Hin Jacky
-- Tom Yeh
-- Hyunwoo
+- Tang Yeh (Tom)
+- Hyunwoo Nam
 - Jackson Falk 
 ---
 
