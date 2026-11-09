@@ -88,7 +88,8 @@ Item
 
 **API Name:** CATTAS
 **Documentation:** [CATTAS] (https://cataas.com/)
-**How it is used in the program:** Give picture for user to choose the desired cat
+**How it is used in the program:** (Give picture for user to choose the desired cat)
+
 ---
 ## Design Diagrams
 ### UML Class Diagram
