@@ -87,7 +87,7 @@ Item
 **How it is used in the program:** Give picture for user to choose the desired dog
 
 **API Name:** CATTAS
-**Documentation:** [CATTAS] (https://dog.ceo/dog-api/](https://cataas.com/)
+**Documentation:** [CATTAS] (https://cataas.com/)
 **How it is used in the program:** Give picture for user to choose the desired cat
 ---
 ## Design Diagrams
