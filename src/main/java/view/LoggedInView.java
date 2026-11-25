@@ -36,6 +36,8 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     private final JButton viewBudgetProgress = new JButton("View Budget Progress");
 
+    private final JButton setBudget = new JButton("Set Budget");
+
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.loggedInViewModel.addListener(this);
@@ -57,6 +59,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         buttons.add(changePassword);
         buttons.add(recordTransaction);
         buttons.add(viewBudgetProgress);
+        buttons.add(setBudget);
 
         logOut.addActionListener(this);
 
@@ -149,6 +152,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     public void setShowBudgetProgress(Runnable action) {
         viewBudgetProgress.addActionListener(event -> action.run());
+    }
+
+    public void setShowSetBudget(Runnable action) {                 
+        setBudget.addActionListener(event -> action.run());
     }
 
     public void setInteractWithPetController(

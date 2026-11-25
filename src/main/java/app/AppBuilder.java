@@ -4,7 +4,7 @@ import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
 import data_access.InMemoryTransactionDataAccessObject;
-import data_access.InMemoryBudgetDataAccessObject;
+import data_access.FileBudgetDataAccessObject;
 
 import data_access.ApiPetImageDataAccessObject;
 import entity.UserFactory;
@@ -29,6 +29,10 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.view_budget_progress.ViewBudgetProgressController;
 import interface_adapter.view_budget_progress.ViewBudgetProgressPresenter;
 import interface_adapter.view_budget_progress.ViewBudgetProgressViewModel;
+import interface_adapter.set_budget.SetBudgetController;
+import interface_adapter.set_budget.SetBudgetPresenter;
+import interface_adapter.set_budget.SetBudgetState;
+import interface_adapter.set_budget.SetBudgetViewModel;
 
 import interface_adapter.adopt_pet.AdoptPetViewModel;
 import interface_adapter.interact_with_pet.InteractWithPetController;
@@ -56,6 +60,9 @@ import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import use_case.view_budget_progress.ViewBudgetProgressInteractor;
+import use_case.set_budget.SetBudgetInputBoundary;
+import use_case.set_budget.SetBudgetInteractor;
+import use_case.set_budget.SetBudgetOutputBoundary;
 
 import use_case.interact_with_pet.InteractWithPetInteractor;
 import use_case.get_pet_picture.GetPetPictureInteractor;
@@ -69,6 +76,7 @@ import view.ViewManager;
 import view.ViewBudgetProgressView;
 import view.AdoptPetView;
 import view.InteractWithPetView;
+import view.SetBudgetView;
 
 
 import javax.swing.*;
@@ -91,8 +99,8 @@ public class AppBuilder {
     private final InMemoryTransactionDataAccessObject transactionDataAccessObject =
             new InMemoryTransactionDataAccessObject(userDataAccessObject);
 
-    private final InMemoryBudgetDataAccessObject budgetDataAccessObject =
-            new InMemoryBudgetDataAccessObject();
+    private final FileBudgetDataAccessObject budgetDataAccessObject =
+            new FileBudgetDataAccessObject("budgets.json");
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -116,6 +124,9 @@ public class AppBuilder {
     private ViewBudgetProgressViewModel budgetProgressViewModel;
     private ViewBudgetProgressView budgetProgressView;
 
+    private SetBudgetViewModel setBudgetViewModel;
+    private SetBudgetView setBudgetView;
+
     public AppBuilder() {
         view.settings.ThemeManager.initialize();
 
@@ -124,9 +135,6 @@ public class AppBuilder {
 
         cardPanel.setLayout(cardLayout);
 
-        // FOR TEST PURPOSE
-        budgetDataAccessObject.saveDailyLimit(
-                "username_test", new java.math.BigDecimal("100.00"));
     }
 
     public AppBuilder addSignupView() {
@@ -424,6 +432,38 @@ public class AppBuilder {
         AdoptPetController controller = new AdoptPetController(interactor);
         adoptPetView.setAdoptPetController(controller);
 
+        return this;
+    }
+
+        public AppBuilder addSetBudgetView() {
+        setBudgetViewModel = new SetBudgetViewModel();
+        setBudgetView = new SetBudgetView(setBudgetViewModel);
+        cardPanel.add(setBudgetView, SetBudgetViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addSetBudgetUseCase() {
+        final SetBudgetOutputBoundary setBudgetOutputBoundary = new SetBudgetPresenter(
+                viewManagerModel, setBudgetViewModel, loggedInViewModel);
+        final SetBudgetInputBoundary setBudgetInteractor = new SetBudgetInteractor(
+                budgetDataAccessObject, setBudgetOutputBoundary);
+
+        final SetBudgetController controller = new SetBudgetController(setBudgetInteractor);
+        setBudgetView.setSetBudgetController(controller);
+
+        loggedInView.setShowSetBudget(() -> {
+            final SetBudgetState state = new SetBudgetState();
+            state.setUsername(loggedInViewModel.getState().getUsername());
+            setBudgetViewModel.setState(state);
+            setBudgetViewModel.notifyStateChanged();
+            viewManagerModel.setState(SetBudgetViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
+        setBudgetView.setShowLoggedIn(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
         return this;
     }
 
