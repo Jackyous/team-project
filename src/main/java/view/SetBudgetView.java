@@ -42,7 +42,7 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel limitInfo = new LabelTextPanel(new JLabel("Daily budget"), dailyLimitField);
-        final LabelTextPanel balanceInfo = new LabelTextPanel(new JLabel("Total balance"), balanceField);
+        final LabelTextPanel balanceInfo = new LabelTextPanel(new JLabel("Starting balance (first setup only)"), balanceField);
 
         final JButton save = new JButton("Save");
         final JButton back = new JButton("Back");

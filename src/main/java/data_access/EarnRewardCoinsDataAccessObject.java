@@ -10,18 +10,29 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import entity.Budget;
+
 public class EarnRewardCoinsDataAccessObject
         implements EarnRewardCoinsDataAccessInterface{
     private final Map<String, ZoneId> timeZones = new HashMap<>();
     private final Map<String, Integer> balances = new HashMap<>();
-    private final Map<String, Map<LocalDate, BigDecimal>> budgets =
-            new HashMap<>();
-
-    private final Map<String, Map<LocalDate, BigDecimal>> spending =
-            new HashMap<>();
+//    private final Map<String, Map<LocalDate, BigDecimal>> budgets =
+//            new HashMap<>();
 
     private final Map<String, Set<LocalDate>> claimedDates =
             new HashMap<>();
+
+    private final InMemoryTransactionDataAccessObject transactionDataAccess;
+
+    private final FileBudgetDataAccessObject budgetDataAccess;
+
+    public EarnRewardCoinsDataAccessObject(
+            InMemoryTransactionDataAccessObject transactionDataAccess,
+            FileBudgetDataAccessObject budgetDataAccess) {
+
+        this.transactionDataAccess = transactionDataAccess;
+        this.budgetDataAccess = budgetDataAccess;
+    }
 
     public synchronized void addUser(String userId, ZoneId timeZone) {
         if (timeZones.containsKey(userId)) {
@@ -30,32 +41,20 @@ public class EarnRewardCoinsDataAccessObject
 
         timeZones.put(userId, timeZone);
         balances.put(userId, 0);
-        budgets.put(userId, new HashMap<>());
-        spending.put(userId, new HashMap<>());
+//        budgets.put(userId, new HashMap<>());
         claimedDates.put(userId, new HashSet<>());
     }
 
-    public synchronized void setBudget(
-            String userId, LocalDate date, BigDecimal amount) {
-        requireUser(userId);
-
-        if (amount.signum() < 0) {
-            throw new IllegalArgumentException("Budget cannot be negative.");
-        }
-
-        budgets.get(userId).put(date, amount);
-    }
-
-    public synchronized void setTotalSpending(
-            String userId, LocalDate date, BigDecimal amount) {
-        requireUser(userId);
-
-        if (amount.signum() < 0) {
-            throw new IllegalArgumentException("Spending cannot be negative.");
-        }
-
-        spending.get(userId).put(date, amount);
-    }
+//    public synchronized void setBudget(
+//            String userId, LocalDate date, BigDecimal amount) {
+//        requireUser(userId);
+//
+//        if (amount.signum() < 0) {
+//            throw new IllegalArgumentException("Budget cannot be negative.");
+//        }
+//
+//        budgets.get(userId).put(date, amount);
+//    }
 
     @Override
     public synchronized ZoneId getUserTimeZone(String userId) {
@@ -66,15 +65,20 @@ public class EarnRewardCoinsDataAccessObject
     @Override
     public synchronized Optional<BigDecimal> getBudget(
             String userId, LocalDate date) {
+
         requireUser(userId);
-        return Optional.ofNullable(budgets.get(userId).get(date));
+
+        return Optional.ofNullable(
+                        budgetDataAccess.getBudget(userId, date))
+                .map(Budget::getLimit);
     }
 
     @Override
     public synchronized BigDecimal getTotalSpending(
             String userId, LocalDate date) {
+
         requireUser(userId);
-        return spending.get(userId).getOrDefault(date, BigDecimal.ZERO);
+        return transactionDataAccess.getTotalExpenses(userId, date);
     }
 
     @Override

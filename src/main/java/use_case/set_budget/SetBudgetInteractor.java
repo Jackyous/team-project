@@ -5,63 +5,111 @@ import java.math.BigDecimal;
 import entity.Budget;
 import entity.Wallet;
 
+import java.time.Clock;
+import java.time.LocalDate;
+
 /**
  * The Set Budget Interactor.
  */
 public class SetBudgetInteractor implements SetBudgetInputBoundary {
     private final SetBudgetDataAccessInterface dataAccess;
     private final SetBudgetOutputBoundary presenter;
+    private final Clock clock;
 
-    public SetBudgetInteractor(SetBudgetDataAccessInterface dataAccess,
-                               SetBudgetOutputBoundary presenter) {
+    public SetBudgetInteractor(
+            SetBudgetDataAccessInterface dataAccess,
+            SetBudgetOutputBoundary presenter) {
+
+        this(dataAccess, presenter, Clock.systemDefaultZone());
+    }
+
+    public SetBudgetInteractor(
+            SetBudgetDataAccessInterface dataAccess,
+            SetBudgetOutputBoundary presenter,
+            Clock clock) {
+
         this.dataAccess = dataAccess;
         this.presenter = presenter;
+        this.clock = clock;
     }
 
     @Override
     public void execute(SetBudgetInputData inputData) {
-        final String username = inputData.getUsername();
-        final String limitText = inputData.getDailyLimitText();
-        final String balanceText = inputData.getBalanceText();
+        String username = inputData.getUsername();
+        String limitText = inputData.getDailyLimitText();
+        String balanceText = inputData.getBalanceText();
 
-        if (isBlank(username) || isBlank(limitText) || isBlank(balanceText)) {
-            presenter.prepareFailView("All fields must be filled in.");
+        if (isBlank(username) || isBlank(limitText)) {
+            presenter.prepareFailView(
+                    "Username and daily budget are required.");
             return;
         }
 
-        final BigDecimal dailyLimit;
+        Wallet existingWallet = dataAccess.getWallet(username);
+        boolean firstBalanceSetup = existingWallet == null;
+
+        if (firstBalanceSetup && isBlank(balanceText)) {
+            presenter.prepareFailView(
+                    "Please enter your starting balance.");
+            return;
+        }
+
+        BigDecimal dailyLimit;
+
         try {
             dailyLimit = new BigDecimal(limitText.trim());
-        }
-        catch (NumberFormatException exception) {
-            presenter.prepareFailView("Daily limit must be a valid number.");
+        } catch (NumberFormatException exception) {
+            presenter.prepareFailView(
+                    "Daily limit must be a valid number.");
             return;
         }
 
-        final BigDecimal balance;
-        try {
-            balance = new BigDecimal(balanceText.trim());
-        }
-        catch (NumberFormatException exception) {
-            presenter.prepareFailView("Balance must be a valid number.");
-            return;
-        }
+        Budget budget;
 
-        final Budget budget;
         try {
             budget = new Budget(dailyLimit);
-        }
-        catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException exception) {
             presenter.prepareFailView(exception.getMessage());
             return;
         }
-        final Wallet wallet = new Wallet(balance);
 
-        dataAccess.saveBudget(username, budget);
-        dataAccess.saveWallet(username, wallet);
+        Wallet wallet = existingWallet;
+
+        if (firstBalanceSetup) {
+            BigDecimal startingBalance;
+
+            try {
+                startingBalance = new BigDecimal(balanceText.trim());
+            } catch (NumberFormatException exception) {
+                presenter.prepareFailView(
+                        "Starting balance must be a valid number.");
+                return;
+            }
+
+            wallet = new Wallet(startingBalance);
+        }
+
+        LocalDate today = LocalDate.now(clock);
+
+        boolean firstBudgetSetup = !dataAccess.hasBudget(username);
+
+        dataAccess.migrateLegacyBudget(username, today);
+
+        LocalDate effectiveDate =
+                firstBudgetSetup ? today : today.plusDays(1);
+
+        dataAccess.saveBudgetEffectiveOn(
+                username, budget, effectiveDate);
+
+        // Budget edits must never reset an existing wallet.
+        if (firstBalanceSetup) {
+            dataAccess.saveWallet(username, wallet);
+        }
 
         presenter.prepareSuccessView(new SetBudgetOutputData(
-                username, dailyLimit.toPlainString(), balance.toPlainString()));
+                username,
+                dailyLimit.toPlainString(),
+                wallet.getBalance().toPlainString()));
     }
 
     private static boolean isBlank(String text) {

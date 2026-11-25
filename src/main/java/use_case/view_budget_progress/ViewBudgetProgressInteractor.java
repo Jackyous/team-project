@@ -14,7 +14,7 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
     public ViewBudgetProgressInteractor(ViewBudgetProgressTransactionDataAccessInterface transactions,
             ViewBudgetProgressBudgetDataAccessInterface budgets,
             ViewBudgetProgressOutputBoundary presenter) {
-        this(transactions, budgets, presenter, Clock.systemUTC());
+        this(transactions, budgets, presenter, Clock.systemDefaultZone());
     }
 
     public ViewBudgetProgressInteractor(ViewBudgetProgressTransactionDataAccessInterface transactions,
@@ -33,7 +33,10 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
             presenter.prepareFailView("Please sign in to view budget progress.");
             return;
         }
-        BigDecimal limit = budgets.getDailyLimit(username);
+
+        LocalDate today = LocalDate.now(clock);
+        BigDecimal limit = budgets.getDailyLimit(username, today);
+
         if (limit == null) {
             presenter.prepareFailView("Set a daily budget first.");
             return;
@@ -42,7 +45,7 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
             presenter.prepareFailView("The daily budget must be greater than zero.");
             return;
         }
-        LocalDate today = LocalDate.now(clock);
+
         BigDecimal spent = BigDecimal.ZERO;
         for (Transaction transaction : transactions.getTransactions(username)) {
             if (transaction.getType() == Transaction.Type.EXPENSE

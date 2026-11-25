@@ -3,4 +3,6 @@ import java.math.BigDecimal;
 public interface ViewBudgetProgressBudgetDataAccessInterface {
     /** Returns this user's recurring daily limit, or null if unset. */
     BigDecimal getDailyLimit(String username);
+    BigDecimal getDailyLimit(
+            String username, java.time.LocalDate date);
 }

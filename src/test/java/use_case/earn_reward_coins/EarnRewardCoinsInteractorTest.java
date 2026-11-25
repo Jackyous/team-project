@@ -13,6 +13,15 @@ import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import data_access.InMemoryUserDataAccessObject;
+import data_access.InMemoryTransactionDataAccessObject;
+import entity.Transaction;
+
+import data_access.FileBudgetDataAccessObject;
+import entity.Budget;
+import java.nio.file.Path;
+import org.junit.jupiter.api.io.TempDir;
+
 class EarnRewardCoinsInteractorTest {
 
     private static final String USER_ID = "user1";
@@ -29,10 +38,26 @@ class EarnRewardCoinsInteractorTest {
     private EarnRewardCoinsDataAccessObject dao;
     private TestPresenter presenter;
     private EarnRewardCoinsInteractor interactor;
+    private InMemoryTransactionDataAccessObject transactionDao;
+
+    @TempDir
+    Path tempDirectory;
+
+    private FileBudgetDataAccessObject budgetDao;
+
 
     @BeforeEach
     void setUp() {
-        dao = new EarnRewardCoinsDataAccessObject();
+        InMemoryUserDataAccessObject userDao =
+                new InMemoryUserDataAccessObject();
+
+        transactionDao =
+                new InMemoryTransactionDataAccessObject(userDao);
+
+        budgetDao = new FileBudgetDataAccessObject(
+                tempDirectory.resolve("budgets.json").toString());
+
+        dao = new EarnRewardCoinsDataAccessObject(transactionDao, budgetDao);
         dao.addUser(USER_ID, ZoneId.of("America/Toronto"));
 
         presenter = new TestPresenter();
@@ -59,8 +84,7 @@ class EarnRewardCoinsInteractorTest {
     @Test
     void spendingBelowBudgetEarnsReward() {
         setBudget("20.00");
-        dao.setTotalSpending(
-                USER_ID, yesterday, new BigDecimal("19.99"));
+        addExpense("19.00");
 
         claim();
 
@@ -72,8 +96,7 @@ class EarnRewardCoinsInteractorTest {
     @Test
     void spendingEqualToBudgetEarnsReward() {
         setBudget("20.00");
-        dao.setTotalSpending(
-                USER_ID, yesterday, new BigDecimal("20.00"));
+        addExpense("20.00");
 
         claim();
 
@@ -87,8 +110,7 @@ class EarnRewardCoinsInteractorTest {
     @Test
     void spendingAboveBudgetIsRejected() {
         setBudget("20.00");
-        dao.setTotalSpending(
-                USER_ID, yesterday, new BigDecimal("20.01"));
+        addExpense("21.00");
 
         claim();
 
@@ -103,12 +125,10 @@ class EarnRewardCoinsInteractorTest {
     }
 
     @Test
-    void zeroBudgetIsRejected() {
-        setBudget("0.00");
-
-        claim();
-
-        assertRejectedWithoutReward();
+    void zeroBudgetCannotBeCreated() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Budget(BigDecimal.ZERO));
     }
 
     @Test
@@ -147,8 +167,12 @@ class EarnRewardCoinsInteractorTest {
 
         // UTC yesterday is November 16; Toronto yesterday is November 15.
         LocalDate utcYesterday = LocalDate.now(clock).minusDays(1);
-        dao.setBudget(USER_ID, utcYesterday, BigDecimal.ZERO);
+        budgetDao.saveBudgetEffectiveOn(
+                USER_ID,
+                new Budget(new BigDecimal("1.00")),
+                utcYesterday);
 
+        addExpense("10.00");
         claim();
 
         assertNotNull(presenter.result);
@@ -157,7 +181,19 @@ class EarnRewardCoinsInteractorTest {
     }
 
     private void setBudget(String amount) {
-        dao.setBudget(USER_ID, yesterday, new BigDecimal(amount));
+        budgetDao.saveBudgetEffectiveOn(
+                USER_ID,
+                new Budget(new BigDecimal(amount)),
+                yesterday);
+    }
+
+    private void addExpense(String amount) {
+        transactionDao.save(
+                USER_ID,
+                new Transaction(
+                        new BigDecimal(amount),
+                        Transaction.Type.EXPENSE,
+                        yesterday));
     }
 
     private void claim() {
@@ -189,4 +225,19 @@ class EarnRewardCoinsInteractorTest {
             error = errorMessage;
         }
     }
+    @Test
+    void higherBudgetTodayDoesNotMakeYesterdayEligible() {
+        setBudget("20.00");
+        addExpense("25.00");
+
+        budgetDao.saveBudgetEffectiveOn(
+                USER_ID,
+                new Budget(new BigDecimal("100.00")),
+                yesterday.plusDays(1));
+
+        claim();
+
+        assertRejectedWithoutReward();
+    }
+
 }
