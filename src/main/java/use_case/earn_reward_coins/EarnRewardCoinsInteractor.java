@@ -53,6 +53,9 @@ public class EarnRewardCoinsInteractor implements EarnRewardCoinsInputBoundary{
         int newBalance;
         try{
             newBalance = dataAccess.claimReward(userId, yesterday, rewardAmount);
+        } catch (java.io.UncheckedIOException exception) {
+            presenter.prepareFailView("Could not save your reward. Please try again.");
+            return;
         } catch (IllegalStateException exception){
             presenter.prepareFailView(
                     "You already claimed yesterday's reward");

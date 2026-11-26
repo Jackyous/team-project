@@ -58,4 +58,18 @@ public class InMemoryTransactionDataAccessObject
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    public BigDecimal getNetBalanceChange(String userId) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Transaction transaction : getTransactions(userId)) {
+            if (transaction.getType() == Transaction.Type.INCOME) {
+                total = total.add(transaction.getAmount());
+            } else {
+                total = total.subtract(transaction.getAmount());
+            }
+        }
+
+        return total;
+    }
 }

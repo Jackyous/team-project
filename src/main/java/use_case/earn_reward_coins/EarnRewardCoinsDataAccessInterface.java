@@ -13,4 +13,5 @@ public interface EarnRewardCoinsDataAccessInterface {
     boolean hasClaimedReward(String userId, LocalDate rewardDate);
     int claimReward(String userId, LocalDate rewardDate, int coins);
     int getCoinBalance(String userId);
+
 }

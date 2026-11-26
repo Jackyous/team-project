@@ -3,7 +3,6 @@ package app;
 import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
-import data_access.InMemoryTransactionDataAccessObject;
 import data_access.FileBudgetDataAccessObject;
 
 import data_access.ApiPetImageDataAccessObject;
@@ -83,24 +82,48 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ExecutionException;
 
+import data_access.EarnRewardCoinsDataAccessObject;
+import entity.Wallet;
+
+import interface_adapter.earn_reward_coins.EarnRewardCoinsController;
+import interface_adapter.earn_reward_coins.EarnRewardCoinsPresenter;
+import interface_adapter.earn_reward_coins.EarnRewardCoinsViewModel;
+
+import use_case.earn_reward_coins.EarnRewardCoinsInteractor;
+import use_case.earn_reward_coins.EarnRewardCoinsStatusInteractor;
+
+import view.EarnRewardCoinsView;
+
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
+import data_access.FileTransactionDataAccessObject;
+
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
     final UserFactory userFactory = new UserFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
-
-    // set which data access implementation to use, can be any
-    // of the classes from the data_access package
-
-    // DAO version using local file storage
-    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
-
-    private final InMemoryTransactionDataAccessObject transactionDataAccessObject =
-            new InMemoryTransactionDataAccessObject(userDataAccessObject);
+    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject(
+            "users.csv", userFactory);
 
     private final FileBudgetDataAccessObject budgetDataAccessObject =
             new FileBudgetDataAccessObject("budgets.json");
+
+    private final FileTransactionDataAccessObject transactionDataAccessObject =
+            new FileTransactionDataAccessObject(
+                    userDataAccessObject,
+                    budgetDataAccessObject);
+
+    private final Clock applicationClock = Clock.systemDefaultZone();
+
+    private final EarnRewardCoinsDataAccessObject rewardDataAccessObject =
+            new EarnRewardCoinsDataAccessObject(
+                    transactionDataAccessObject,
+                    budgetDataAccessObject);
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -350,6 +373,13 @@ public class AppBuilder {
             viewManagerModel.notifyViewChanged();
         });
 
+        recordTransactionView.setBackAction(() -> {
+            refreshBankSummary();
+
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
         return this;
     }
 
@@ -452,15 +482,29 @@ public class AppBuilder {
         setBudgetView.setSetBudgetController(controller);
 
         loggedInView.setShowSetBudget(() -> {
-            final SetBudgetState state = new SetBudgetState();
-            state.setUsername(loggedInViewModel.getState().getUsername());
+            String username = loggedInViewModel.getState().getUsername();
+
+            SetBudgetState state = new SetBudgetState();
+            state.setUsername(username);
+
+            Wallet wallet = budgetDataAccessObject.getWallet(username);
+            state.setBalanceInitialized(wallet != null);
+
+            if (wallet != null) {
+                // Balance setup is complete; no starting amount is requested.
+                state.setBalance("");
+            }
+
             setBudgetViewModel.setState(state);
             setBudgetViewModel.notifyStateChanged();
+
             viewManagerModel.setState(SetBudgetViewModel.VIEW_NAME);
             viewManagerModel.notifyViewChanged();
         });
 
         setBudgetView.setShowLoggedIn(() -> {
+            refreshBankSummary();
+
             viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
             viewManagerModel.notifyViewChanged();
         });
@@ -472,6 +516,10 @@ public class AppBuilder {
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
+        //prevents the previous account’s reward status from appearing for another user.
+        if (loggedInView != null) {
+            installBankActions(application);
+        }
 
         viewManagerModel.setState(LoginViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
@@ -481,5 +529,84 @@ public class AppBuilder {
         return application;
     }
 
+    private void refreshBankSummary() {
+        String username = userDataAccessObject.getCurrentUsername();
 
+        if (username == null || username.isBlank()) {
+            return;
+        }
+
+        ZoneId zone = applicationClock.getZone();
+
+        rewardDataAccessObject.ensureUser(username, zone);
+
+        // Convert an old undated budget only if this user needs migration.
+        budgetDataAccessObject.migrateLegacyBudget(
+                username, LocalDate.now(applicationClock));
+
+        Wallet wallet = budgetDataAccessObject.getWallet(username);
+        BigDecimal moneyBalance = null;
+
+        if (wallet != null) {
+            moneyBalance = wallet.getBalance();
+        }
+
+        loggedInView.updateBankSummary(
+                moneyBalance,
+                rewardDataAccessObject.getCoinBalance(username));
+    }
+
+    private void installBankActions(JFrame application) {
+        loggedInView.setShowBank(this::refreshBankSummary);
+
+        loggedInView.setShowRewards(() -> {
+            String username = userDataAccessObject.getCurrentUsername();
+
+            if (username == null || username.isBlank()) {
+                return;
+            }
+
+            refreshBankSummary();
+
+            EarnRewardCoinsViewModel viewModel =
+                    new EarnRewardCoinsViewModel();
+
+            EarnRewardCoinsPresenter presenter =
+                    new EarnRewardCoinsPresenter(viewModel);
+
+            EarnRewardCoinsInteractor claimInteractor =
+                    new EarnRewardCoinsInteractor(
+                            rewardDataAccessObject,
+                            presenter,
+                            10,
+                            applicationClock);
+
+            EarnRewardCoinsStatusInteractor statusInteractor =
+                    new EarnRewardCoinsStatusInteractor(
+                            rewardDataAccessObject,
+                            presenter,
+                            applicationClock);
+
+            EarnRewardCoinsController controller =
+                    new EarnRewardCoinsController(
+                            claimInteractor, statusInteractor);
+
+            EarnRewardCoinsView rewardView =
+                    new EarnRewardCoinsView(
+                            username, controller, viewModel);
+
+            JDialog dialog = new JDialog(
+                    application, "Reward Coins", true);
+
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            dialog.setContentPane(rewardView);
+            dialog.pack();
+            dialog.setLocationRelativeTo(application);
+
+            // Modal: execution resumes here after the dialog closes.
+            dialog.setVisible(true);
+
+            refreshBankSummary();
+        });
+    }
 }
