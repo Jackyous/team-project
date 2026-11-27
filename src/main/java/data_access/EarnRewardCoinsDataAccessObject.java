@@ -5,7 +5,6 @@ import use_case.open_pet_shop.OpenPetShopCoinDataAccessInterface;
 
 import entity.Budget;
 import entity.Transaction;
-import use_case.earn_reward_coins.EarnRewardCoinsDataAccessInterface;
 import use_case.view_budget_progress.ViewBudgetProgressTransactionDataAccessInterface;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,11 +32,7 @@ public class EarnRewardCoinsDataAccessObject
             throw new IllegalArgumentException("User already exists.");
         }
 
-        timeZones.put(userId, timeZone);
-        balances.put(userId, 0);
-        budgets.put(userId, new HashMap<>());
-        spending.put(userId, new HashMap<>());
-        claimedDates.put(userId, new HashSet<>());
+        timeZones.put(userId, zone);
     }
 
     public synchronized void ensureUserExists(
@@ -55,16 +50,6 @@ public class EarnRewardCoinsDataAccessObject
         }
     }
 
-    public synchronized void setBudget(
-            String userId, LocalDate date, BigDecimal amount) {
-        requireUser(userId);
-
-        if (amount.signum() < 0) {
-            throw new IllegalArgumentException("Budget cannot be negative.");
-        }
-
-        budgets.get(userId).put(date, amount);
-    }
     public synchronized void ensureUser(String userId, ZoneId zone) {
         if (!timeZones.containsKey(userId)) { addUser(userId, zone); }
     }
@@ -90,23 +75,7 @@ public class EarnRewardCoinsDataAccessObject
 
     @Override
     public synchronized int spendCoins(String userId, int amount) {
-        requireUser(userId);
-
-        if (amount <= 0) {
-            throw new IllegalArgumentException(
-                    "Coins spent must be positive.");
-        }
-
-        int currentBalance = balances.get(userId);
-
-        if (currentBalance < amount) {
-            throw new IllegalStateException(
-                    "You don't have enough coins.");
-        }
-
-        int newBalance = currentBalance - amount;
-        balances.put(userId, newBalance);
-
-        return newBalance;
+        return store.spendCoins(userId, amount);
     }
+
 }

@@ -225,4 +225,26 @@ public class FileBudgetDataAccessObject implements SetBudgetDataAccessInterface,
         save(next);
         return balance;
     }
+
+    public synchronized int spendCoins(String userId, int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException(
+                    "Coins spent must be positive.");
+        }
+
+        int currentBalance = getCoinBalance(userId);
+
+        if (currentBalance < amount) {
+            throw new IllegalStateException(
+                    "You don't have enough coins.");
+        }
+
+        int newBalance = currentBalance - amount;
+
+        JSONObject next = copy();
+        account(next, userId).put("coinBalance", newBalance);
+
+        save(next);
+        return newBalance;
+    }
 }

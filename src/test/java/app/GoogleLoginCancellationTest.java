@@ -41,7 +41,11 @@ class GoogleLoginCancellationTest {
         view = (LoginView) field(builder, "loginView");
     }
     private void click(String label) throws Exception {
-        SwingUtilities.invokeAndWait(() -> button(view, label).doClick());
+        SwingUtilities.invokeAndWait(() -> {
+            JButton target = button(view, label);
+            assertNotNull(target, "Button not found: " + label);
+            target.doClick();
+        });
     }
     private void awaitIdle() throws Exception {
         for (int i = 0; i < 100; i++) {
@@ -73,13 +77,13 @@ class GoogleLoginCancellationTest {
         try {
             click("Continue with Google");
             assertTrue(started.await(2, TimeUnit.SECONDS));
-            click("Cancel Google sign-in");
+            click("Cancel Google Sign-In");
             assertTrue(interrupted.await(2, TimeUnit.SECONDS));
             SwingUtilities.invokeAndWait(() -> {
                 assertNull(builder.userDataAccessObject.getCurrentUsername());
-                assertTrue(button(view, "log in").isEnabled());
+                assertTrue(button(view, "Log In").isEnabled());
                 assertTrue(button(view, "Sign Up").isEnabled());
-                assertFalse(button(view, "Cancel Google sign-in").isVisible());
+                assertFalse(button(view, "Cancel Google Sign-In").isVisible());
             });
             click("Continue with Google");
             awaitIdle();
