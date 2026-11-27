@@ -1,7 +1,7 @@
 [{
   "owner": "tom",
   "species": "DOG",
-  "happiness": 9,
+  "happiness": 10,
   "imageUrl": "https://images.dog.ceo/breeds/puggle/img_151824.jpg",
   "name": "dogie",
   "health": 10,

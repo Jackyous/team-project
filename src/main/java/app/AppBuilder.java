@@ -569,6 +569,9 @@ public class AppBuilder {
 
         loggedInView.setOpenPetShopController(controller);
 
+        return this;
+    }
+
         public AppBuilder addSetBudgetView() {
         setBudgetViewModel = new SetBudgetViewModel();
         setBudgetView = new SetBudgetView(setBudgetViewModel);
