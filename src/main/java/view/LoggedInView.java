@@ -40,6 +40,23 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     private final JButton setBudget = new JButton("Set Budget");
 
+    private final JButton bankSystem = new JButton("Bank system");
+    private final JButton pet = new JButton("Pet");
+
+    private final JPanel bankPanel = new JPanel();
+    private final JPanel petPanel = new JPanel();
+
+    private final JLabel moneyBalanceLabel =
+            new JLabel("Money balance: not loaded");
+
+    private final JLabel rewardCoinsLabel =
+            new JLabel("Reward coins: not loaded");
+
+    private final JButton rewards =
+            new JButton("View / Claim Reward");
+
+    private Runnable showBank = () -> { };
+
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.loggedInViewModel.addListener(this);
@@ -59,9 +76,8 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
         changePassword = new JButton("Change Password");
         buttons.add(changePassword);
-        buttons.add(recordTransaction);
-        buttons.add(viewBudgetProgress);
-        buttons.add(setBudget);
+        buttons.add(bankSystem);
+        buttons.add(pet);
 
         logOut.addActionListener(this);
 
@@ -113,9 +129,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         this.add(passwordErrorField);
         this.add(buttons);
 
-        final JPanel petMenu = new JPanel();
-        final JButton interactPet = new JButton("Interact with pet!");
-        final JButton petShop = new JButton("Enter pet item shop!");
+        bankPanel.setLayout(new BoxLayout(bankPanel, BoxLayout.Y_AXIS));
+
+        bankPanel.add(moneyBalanceLabel);
+        bankPanel.add(rewardCoinsLabel);
 
         petShop.addActionListener(event -> {
             String currentUsername =
@@ -130,11 +147,50 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
             interactWithPetController.execute(currentUsername);
         });
+      
+      JPanel bankActions = new JPanel();
+        bankActions.add(recordTransaction);
+        bankActions.add(viewBudgetProgress);
+        bankActions.add(setBudget);
+        bankActions.add(rewards);
 
-        petMenu.add(interactPet);
-        petMenu.add(petShop);
+        bankPanel.add(bankActions);
+        bankPanel.setVisible(false);
 
-        this.add(petMenu);
+// Enable when AppBuilder connects the reward screen.
+        rewards.setEnabled(false);
+
+        JButton interactPet = new JButton("Interact with Pet");
+        JButton petShop = new JButton("Pet Item Shop");
+
+// Your current shop button has no action connected.
+        petShop.setEnabled(false);
+        petShop.setToolTipText("Pet shop is not connected yet.");
+
+        petPanel.add(interactPet);
+        petPanel.add(petShop);
+        petPanel.setVisible(false);
+
+        bankSystem.addActionListener(event -> {
+            bankPanel.setVisible(true);
+            petPanel.setVisible(false);
+
+            showBank.run();
+
+            revalidate();
+            repaint();
+        });
+
+        pet.addActionListener(event -> {
+            bankPanel.setVisible(false);
+            petPanel.setVisible(true);
+
+            revalidate();
+            repaint();
+        });
+
+        this.add(bankPanel);
+        this.add(petPanel);
 
 
     }
@@ -188,6 +244,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         changePassword.setEnabled(!googleAccount);
         passwordInputField.setEnabled(!googleAccount);
         passwordInputField.setText("");
+        bankPanel.setVisible(false);
+        petPanel.setVisible(false);
+        moneyBalanceLabel.setText("Money balance: not loaded");
+        rewardCoinsLabel.setText("Reward coins: not loaded");
     }
 
     /**
@@ -203,5 +263,25 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         else {
             JOptionPane.showMessageDialog(this, state.getPasswordError());
         }
+    }
+
+    public void setShowBank(Runnable action) {
+        showBank = action;
+    }
+
+    public void setShowRewards(Runnable action) {
+        rewards.addActionListener(event -> action.run());
+        rewards.setEnabled(true);
+    }
+
+    public void updateBankSummary(
+            java.math.BigDecimal moneyBalance, int rewardCoins) {
+
+        moneyBalanceLabel.setText(
+                moneyBalance == null
+                        ? "Money balance: set your starting balance first"
+                        : "Money balance: $" + moneyBalance.toPlainString());
+
+        rewardCoinsLabel.setText("Reward coins: " + rewardCoins);
     }
 }

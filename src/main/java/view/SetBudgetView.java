@@ -31,6 +31,7 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
     private final JTextField dailyLimitField = new JTextField(10);
     private final JTextField balanceField = new JTextField(10);
     private final JLabel messageLabel = new JLabel(" ");
+    private final JLabel balanceHint = new JLabel();
 
     public SetBudgetView(SetBudgetViewModel setBudgetViewModel) {
         this.setBudgetViewModel = setBudgetViewModel;
@@ -41,8 +42,8 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
         dateLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final LabelTextPanel limitInfo = new LabelTextPanel(new JLabel("Daily budget"), dailyLimitField);
-        final LabelTextPanel balanceInfo = new LabelTextPanel(new JLabel("Total balance"), balanceField);
+        final LabelTextPanel limitInfo = new LabelTextPanel(new JLabel("Set Daily budget"), dailyLimitField);
+        final LabelTextPanel balanceInfo = new LabelTextPanel(new JLabel("Starting balance (first setup only)"), balanceField);
 
         final JButton save = new JButton("Save");
         final JButton back = new JButton("Back");
@@ -70,6 +71,7 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
         this.add(dateLabel);
         this.add(limitInfo);
         this.add(balanceInfo);
+        this.add(balanceHint);
         this.add(messageLabel);
         this.add(buttons);
 
@@ -122,6 +124,18 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
         else {
             messageLabel.setText(" ");
         }
+
+        balanceField.setEnabled(!state.isBalanceInitialized());
+
+        balanceField.setToolTipText(
+                state.isBalanceInitialized()
+                        ? "Starting balance is already set. Record income or expenses to change your balance."
+                        : "Enter your starting balance.");
+
+        balanceHint.setText(
+                state.isBalanceInitialized()
+                        ? "Balance already set. Use transactions to change it."
+                        : "Enter your starting balance.");
     }
 
     public void setSetBudgetController(SetBudgetController setBudgetController) {

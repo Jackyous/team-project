@@ -72,7 +72,10 @@ public class RecordTransactionInteractor
 
         final Transaction transaction;
         try {
-            transaction = new Transaction(amount, inputData.getType());
+            transaction = new Transaction(
+                    amount,
+                    inputData.getType(),
+                    java.time.LocalDate.now(java.time.Clock.systemDefaultZone()));
         }
         catch (IllegalArgumentException exception) {
             transactionPresenter.prepareFailView(exception.getMessage());
