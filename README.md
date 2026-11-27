@@ -30,16 +30,16 @@ As a user, I want to access virtual store so that I can buy stuffs with rewarded
 ### User Story 4
 As a user, I want to see my spending summary by category so that I can understand where my money goes and check how much money I have left before reaching my budget
 ### User Story 5
-As a user, I want to get rewarded coins if me is under the daily budget limit
+As a user, I want to get rewarded if my spending is under the daily budget limit
 ### User Story 6
-As a user, I want my pet’s condition to change over time, so I can come back and take care of it.
+As a user, I want my pet’s condition to change over time collasped, so feeling that the pet need me to take care of
 ### User Story 7
 As a user, I want to name and customize my pet, such as its appearance or accessories so that it feel like I have a real my own pet
 
 ---
 ## Use Cases
 ### Use Case 1
-Record Transaction
+	Record Transaction
 ### Use Case 2
 	Set Budget and Balance
 ### Use Case 3
