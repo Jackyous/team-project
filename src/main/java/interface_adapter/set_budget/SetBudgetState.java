@@ -9,6 +9,8 @@ public class SetBudgetState {
     private String balance = "";
     private String errorMessage = "";
     private String successMessage = "";
+    private boolean balanceInitialized;
+
 
     public SetBudgetState(SetBudgetState copy) {
         username = copy.username;
@@ -16,6 +18,7 @@ public class SetBudgetState {
         balance = copy.balance;
         errorMessage = copy.errorMessage;
         successMessage = copy.successMessage;
+        balanceInitialized = copy.balanceInitialized;
     }
 
     public SetBudgetState() {
@@ -60,5 +63,13 @@ public class SetBudgetState {
 
     public void setSuccessMessage(String successMessage) {
         this.successMessage = successMessage;
+    }
+
+    public boolean isBalanceInitialized() {
+        return balanceInitialized;
+    }
+
+    public void setBalanceInitialized(boolean balanceInitialized) {
+        this.balanceInitialized = balanceInitialized;
     }
 }

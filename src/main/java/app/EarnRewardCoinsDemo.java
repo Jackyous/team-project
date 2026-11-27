@@ -14,6 +14,12 @@ import view.EarnRewardCoinsView;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import data_access.InMemoryUserDataAccessObject;
+import data_access.InMemoryTransactionDataAccessObject;
+
+import data_access.FileBudgetDataAccessObject;
+import entity.Budget;
+
 public class EarnRewardCoinsDemo {
     public static void main(String[] args) {
         Clock clock = Clock.systemUTC();
@@ -22,11 +28,24 @@ public class EarnRewardCoinsDemo {
         LocalDate yesterday =
                 LocalDate.now(clock.withZone(timeZone)).minusDays(1);
 
+        InMemoryUserDataAccessObject userDao =
+                new InMemoryUserDataAccessObject();
+
+        InMemoryTransactionDataAccessObject transactionDao =
+                new InMemoryTransactionDataAccessObject(userDao);
+
+        FileBudgetDataAccessObject budgetDao =
+                new FileBudgetDataAccessObject("reward-demo-budgets.json");
+
         EarnRewardCoinsDataAccessObject dao =
-                new EarnRewardCoinsDataAccessObject();
+                new EarnRewardCoinsDataAccessObject(transactionDao, budgetDao);
 
         dao.addUser("user1", timeZone);
-        dao.setBudget("user1", yesterday, new BigDecimal("20.00"));
+        // Seed historical data for this standalone demo only.
+        budgetDao.saveBudgetEffectiveOn(
+                "user1",
+                new Budget(new BigDecimal("20.00")),
+                yesterday);
 
         // No spending entry: yesterday's spending defaults to zero.
 

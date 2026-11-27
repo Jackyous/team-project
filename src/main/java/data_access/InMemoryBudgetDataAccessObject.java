@@ -24,4 +24,10 @@ public class InMemoryBudgetDataAccessObject implements ViewBudgetProgressBudgetD
     }
     @Override
     public BigDecimal getDailyLimit(String username) { return limits.get(username); }
+
+    @Override
+    public BigDecimal getDailyLimit(
+            String username, java.time.LocalDate date) {
+        return getDailyLimit(username);
+    }
 }

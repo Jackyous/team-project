@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /**
  * Stores transactions per account for the current application run.
@@ -43,5 +45,31 @@ public class InMemoryTransactionDataAccessObject
     public List<Transaction> getTransactions(String accountId) {
         return new ArrayList<>(
                 transactions.getOrDefault(accountId, Collections.emptyList()));
+    }
+
+    public BigDecimal getTotalExpenses(
+            String userId, LocalDate date) {
+
+        return getTransactions(userId).stream()
+                .filter(transaction ->
+                        transaction.getType() == Transaction.Type.EXPENSE)
+                .filter(transaction ->
+                        transaction.getDate().equals(date))
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal getNetBalanceChange(String userId) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Transaction transaction : getTransactions(userId)) {
+            if (transaction.getType() == Transaction.Type.INCOME) {
+                total = total.add(transaction.getAmount());
+            } else {
+                total = total.subtract(transaction.getAmount());
+            }
+        }
+
+        return total;
     }
 }

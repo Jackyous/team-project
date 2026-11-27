@@ -23,7 +23,8 @@ public class SetBudgetPresenter implements SetBudgetOutputBoundary {
     public void prepareSuccessView(SetBudgetOutputData outputData) {
         final SetBudgetState state = setBudgetViewModel.getState();
         state.setDailyLimit(outputData.getDailyLimitText());
-        state.setBalance(outputData.getBalanceText());
+        state.setBalanceInitialized(true);
+        state.setBalance("");
         state.setErrorMessage("");
         state.setSuccessMessage("Budget saved.");
         setBudgetViewModel.notifyStateChanged();
