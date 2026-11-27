@@ -166,8 +166,8 @@ public class AppBuilder {
     private ViewBudgetProgressViewModel budgetProgressViewModel;
     private ViewBudgetProgressView budgetProgressView;
 
-    private final EarnRewardCoinsDataAccessObject rewardDataAccessObject =
-            new EarnRewardCoinsDataAccessObject();
+//    private final EarnRewardCoinsDataAccessObject rewardDataAccessObject =
+//            new EarnRewardCoinsDataAccessObject();
 
     private final InMemoryPetItemDataAccessObject petItemDataAccessObject =
             new InMemoryPetItemDataAccessObject();
