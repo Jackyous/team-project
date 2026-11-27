@@ -6,6 +6,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logged_in.LoggedInViewModelListener;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.interact_with_pet.InteractWithPetController;
+import interface_adapter.open_pet_shop.OpenPetShopController;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -24,6 +25,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
     private InteractWithPetController interactWithPetController;
+    private OpenPetShopController openPetShopController;
 
     private final JLabel username;
 
@@ -132,7 +134,23 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         bankPanel.add(moneyBalanceLabel);
         bankPanel.add(rewardCoinsLabel);
 
-        JPanel bankActions = new JPanel();
+        JButton interactPet = new JButton("Interact with Pet");
+        JButton petShop = new JButton("Pet Item Shop");
+        petShop.addActionListener(event -> {
+            String currentUsername =
+                    loggedInViewModel.getState().getUsername();
+
+            openPetShopController.execute(currentUsername);
+        });
+
+        interactPet.addActionListener(evt -> {
+            String currentUsername =
+                    loggedInViewModel.getState().getUsername();
+
+            interactWithPetController.execute(currentUsername);
+        });
+      
+      JPanel bankActions = new JPanel();
         bankActions.add(recordTransaction);
         bankActions.add(viewBudgetProgress);
         bankActions.add(setBudget);
@@ -144,23 +162,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 // Enable when AppBuilder connects the reward screen.
         rewards.setEnabled(false);
 
-        JButton interactPet = new JButton("Interact with Pet");
-        JButton petShop = new JButton("Pet Item Shop");
-
-        interactPet.addActionListener(event -> {
-            String currentUsername =
-                    loggedInViewModel.getState().getUsername();
-
-            interactWithPetController.execute(currentUsername);
-        });
-
-// Your current shop button has no action connected.
-        petShop.setEnabled(false);
-        petShop.setToolTipText("Pet shop is not connected yet.");
-
+        petShop.setEnabled(true);
         petPanel.add(interactPet);
         petPanel.add(petShop);
-        petPanel.setVisible(false);
+        petPanel.setVisible(true);
 
         bankSystem.addActionListener(event -> {
             bankPanel.setVisible(true);
@@ -217,6 +222,11 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     public void setInteractWithPetController(
             InteractWithPetController interactWithPetController) {
         this.interactWithPetController = interactWithPetController;
+    }
+
+    public void setOpenPetShopController(
+            OpenPetShopController openPetShopController) {
+        this.openPetShopController = openPetShopController;
     }
 
     /**
