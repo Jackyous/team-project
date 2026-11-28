@@ -24,6 +24,10 @@ public class FileTransactionDataAccessObject implements RecordTransactionDataAcc
         store.recordTransaction(userId, transaction);
     }
     @Override public List<Transaction> getTransactions(String userId) {
-        return store.getTransactions(userId);
+        try {
+            return store.getTransactions(userId);
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException("Could not read saved transactions.", exception);
+        }
     }
 }

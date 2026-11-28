@@ -41,3 +41,6 @@ build/
 /accounts-*.tmp
 /.env
 /client_secret*.json
+# Local financial records (budgets, transactions, balances and rewards)
+/budgets.json
+/financial-*.tmp

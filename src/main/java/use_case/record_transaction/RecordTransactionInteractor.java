@@ -4,6 +4,9 @@ import entity.Transaction;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 /**
  * The Record Transaction Interactor.
@@ -15,11 +18,20 @@ public class RecordTransactionInteractor
 
     private final RecordTransactionDataAccessInterface transactionDataAccess;
     private final RecordTransactionOutputBoundary transactionPresenter;
+    private final Clock clock;
 
     public RecordTransactionInteractor(
             RecordTransactionDataAccessInterface transactionDataAccess,
             RecordTransactionOutputBoundary transactionPresenter) {
 
+        this(transactionDataAccess, transactionPresenter, Clock.systemUTC());
+    }
+
+    public RecordTransactionInteractor(
+            RecordTransactionDataAccessInterface transactionDataAccess,
+            RecordTransactionOutputBoundary transactionPresenter,
+            Clock clock) {
+        this.clock = clock.withZone(ZoneOffset.UTC);
         this.transactionDataAccess = transactionDataAccess;
         this.transactionPresenter = transactionPresenter;
     }
@@ -75,7 +87,7 @@ public class RecordTransactionInteractor
             transaction = new Transaction(
                     amount,
                     inputData.getType(),
-                    java.time.LocalDate.now(java.time.Clock.systemDefaultZone()));
+                    LocalDate.now(clock));
         }
         catch (IllegalArgumentException exception) {
             transactionPresenter.prepareFailView(exception.getMessage());

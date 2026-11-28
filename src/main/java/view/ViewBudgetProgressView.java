@@ -5,7 +5,7 @@ import java.awt.*;
 
 public class ViewBudgetProgressView extends JPanel {
     private final ViewBudgetProgressViewModel viewModel;
-    private final JTextArea summary = new JTextArea(7, 35);
+    private final JTextArea summary = new JTextArea(9, 40);
     private final JProgressBar progress = new JProgressBar(0, 100);
     private final JButton refresh = new JButton("Refresh");
     private final JButton back = new JButton("Back");
@@ -18,7 +18,7 @@ public class ViewBudgetProgressView extends JPanel {
         summary.setEditable(false);
         summary.setLineWrap(true);
         summary.setWrapStyleWord(true);
-        add(new JLabel("Daily Budget Progress"), BorderLayout.NORTH);
+        add(new JLabel("Daily Budget Progress (UTC)"), BorderLayout.NORTH);
         add(new JScrollPane(summary), BorderLayout.CENTER);
         JPanel footer = new JPanel(new BorderLayout());
         footer.add(progress, BorderLayout.NORTH);

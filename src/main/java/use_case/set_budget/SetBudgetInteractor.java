@@ -7,6 +7,7 @@ import entity.Wallet;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 /**
  * The Set Budget Interactor.
@@ -20,7 +21,7 @@ public class SetBudgetInteractor implements SetBudgetInputBoundary {
             SetBudgetDataAccessInterface dataAccess,
             SetBudgetOutputBoundary presenter) {
 
-        this(dataAccess, presenter, Clock.systemDefaultZone());
+        this(dataAccess, presenter, Clock.systemUTC());
     }
 
     public SetBudgetInteractor(
@@ -30,7 +31,7 @@ public class SetBudgetInteractor implements SetBudgetInputBoundary {
 
         this.dataAccess = dataAccess;
         this.presenter = presenter;
-        this.clock = clock;
+        this.clock = clock.withZone(ZoneOffset.UTC);
     }
 
     @Override

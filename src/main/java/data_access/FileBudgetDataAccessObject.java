@@ -16,6 +16,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -152,18 +153,22 @@ public class FileBudgetDataAccessObject implements SetBudgetDataAccessInterface,
     }
 
     public synchronized Budget getBudget(String username) {
-        return getBudget(username, LocalDate.now());
+        return getBudget(username, LocalDate.now(ZoneOffset.UTC));
     }
 
     @Override
     public synchronized BigDecimal getDailyLimit(String username) {
-        return getDailyLimit(username, LocalDate.now());
+        return getDailyLimit(username, LocalDate.now(ZoneOffset.UTC));
     }
 
     @Override
     public synchronized BigDecimal getDailyLimit(String username, LocalDate date) {
-        Budget budget = getBudget(username, date);
-        return budget == null ? null : budget.getLimit();
+        try {
+            Budget budget = getBudget(username, date);
+            return budget == null ? null : budget.getLimit();
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException("Could not read the saved daily budget.", exception);
+        }
     }
 
     /** Wallet and transaction are committed together, never separately. */

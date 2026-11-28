@@ -38,7 +38,7 @@ class SetBudgetInteractorTest {
         interactor.execute(inputData);
 
         assertEquals(0, new BigDecimal("50").compareTo(dataAccess.getBudget(
-                "Paul", java.time.LocalDate.now()).getLimit()));
+                "Paul", java.time.LocalDate.now(java.time.ZoneOffset.UTC)).getLimit()));
         assertEquals(0, new BigDecimal("200").compareTo(dataAccess.getWallet("Paul").getBalance()));
     }
 

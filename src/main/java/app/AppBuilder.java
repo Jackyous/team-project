@@ -137,7 +137,7 @@ public class AppBuilder {
                     userDataAccessObject,
                     budgetDataAccessObject);
 
-    private final Clock applicationClock = Clock.systemDefaultZone();
+    private final Clock applicationClock = Clock.systemUTC();
 
     private final EarnRewardCoinsDataAccessObject rewardDataAccessObject =
             new EarnRewardCoinsDataAccessObject(
@@ -214,7 +214,7 @@ public class AppBuilder {
                         if (username != null && !username.isBlank()) {
                             rewardDataAccessObject.ensureUserExists(
                                     username,
-                                    ZoneId.systemDefault()
+                                    applicationClock.getZone()
                             );
                         }
                     }
@@ -423,7 +423,7 @@ public class AppBuilder {
                 new RecordTransactionPresenter(recordTransactionViewModel);
 
         final RecordTransactionInputBoundary interactor =
-                new RecordTransactionInteractor(transactionDataAccessObject, presenter);
+                new RecordTransactionInteractor(transactionDataAccessObject, presenter, applicationClock);
 
         final RecordTransactionController controller =
                 new RecordTransactionController(interactor);
@@ -466,7 +466,7 @@ public class AppBuilder {
                 new ViewBudgetProgressPresenter(budgetProgressViewModel);
         final ViewBudgetProgressInteractor interactor =
                 new ViewBudgetProgressInteractor(
-                        transactionDataAccessObject, budgetDataAccessObject, presenter);
+                        transactionDataAccessObject, budgetDataAccessObject, presenter, applicationClock);
         final ViewBudgetProgressController controller =
                 new ViewBudgetProgressController(interactor);
         budgetProgressView.setController(controller);
@@ -614,7 +614,7 @@ public class AppBuilder {
         final SetBudgetOutputBoundary setBudgetOutputBoundary = new SetBudgetPresenter(
                 viewManagerModel, setBudgetViewModel, loggedInViewModel);
         final SetBudgetInputBoundary setBudgetInteractor = new SetBudgetInteractor(
-                budgetDataAccessObject, setBudgetOutputBoundary);
+                budgetDataAccessObject, setBudgetOutputBoundary, applicationClock);
 
         final SetBudgetController controller = new SetBudgetController(setBudgetInteractor);
         setBudgetView.setSetBudgetController(controller);

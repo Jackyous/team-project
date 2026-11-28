@@ -1,9 +1,12 @@
 package use_case.view_budget_progress;
 import entity.Transaction;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
+import java.util.List;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoundary {
     private final ViewBudgetProgressTransactionDataAccessInterface transactions;
@@ -14,7 +17,7 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
     public ViewBudgetProgressInteractor(ViewBudgetProgressTransactionDataAccessInterface transactions,
             ViewBudgetProgressBudgetDataAccessInterface budgets,
             ViewBudgetProgressOutputBoundary presenter) {
-        this(transactions, budgets, presenter, Clock.systemDefaultZone());
+        this(transactions, budgets, presenter, Clock.systemUTC());
     }
 
     public ViewBudgetProgressInteractor(ViewBudgetProgressTransactionDataAccessInterface transactions,
@@ -23,7 +26,7 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
         this.transactions = transactions;
         this.budgets = budgets;
         this.presenter = presenter;
-        this.clock = clock;
+        this.clock = clock.withZone(ZoneOffset.UTC);
     }
 
     @Override
@@ -35,19 +38,29 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
         }
 
         LocalDate today = LocalDate.now(clock);
-        BigDecimal limit = budgets.getDailyLimit(username, today);
+        final BigDecimal limit;
+        final BigDecimal tomorrowLimit;
+        final List<Transaction> records;
+        try {
+            limit = budgets.getDailyLimit(username, today);
+            tomorrowLimit = budgets.getDailyLimit(username, today.plusDays(1));
+            records = transactions.getTransactions(username);
+        } catch (IllegalStateException | UncheckedIOException exception) {
+            presenter.prepareFailView("Could not load budget progress. Please try again.");
+            return;
+        }
 
         if (limit == null) {
             presenter.prepareFailView("Set a daily budget first.");
             return;
         }
-        if (limit.signum() <= 0) {
+        if (limit.signum() <= 0 || (tomorrowLimit != null && tomorrowLimit.signum() <= 0)) {
             presenter.prepareFailView("The daily budget must be greater than zero.");
             return;
         }
 
         BigDecimal spent = BigDecimal.ZERO;
-        for (Transaction transaction : transactions.getTransactions(username)) {
+        for (Transaction transaction : records) {
             if (transaction.getType() == Transaction.Type.EXPENSE
                     && transaction.getDate().equals(today)) {
                 spent = spent.add(transaction.getAmount());
@@ -57,6 +70,6 @@ public class ViewBudgetProgressInteractor implements ViewBudgetProgressInputBoun
         BigDecimal percentage = spent.multiply(new BigDecimal("100"))
                 .divide(limit, 1, RoundingMode.HALF_UP);
         presenter.prepareSuccessView(new ViewBudgetProgressOutputData(
-                today, limit, spent, remaining, percentage));
+                today, limit, spent, remaining, percentage, tomorrowLimit));
     }
 }

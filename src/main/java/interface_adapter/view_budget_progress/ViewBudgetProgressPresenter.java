@@ -18,8 +18,13 @@ public class ViewBudgetProgressPresenter implements ViewBudgetProgressOutputBoun
                 + "\nSpent today: " + money(data.getSpent())
                 + (over ? "\nOver budget: " : "\nRemaining: ")
                 + money(data.getRemaining().abs())
-                + "\nBudget used: " + data.getPercentage().toPlainString() + "%"
-                + "\nBudget days start at 00:00 UTC.";
+                + "\nBudget used: " + data.getPercentage().toPlainString() + "%";
+        BigDecimal tomorrowLimit = data.getTomorrowLimit();
+        if (tomorrowLimit != null && tomorrowLimit.compareTo(data.getLimit()) != 0) {
+            message += "\nBudget from " + data.getDate().plusDays(1) + " (UTC): "
+                    + money(tomorrowLimit);
+        }
+        message += "\nBudget days start at 00:00 UTC.";
         int bar = data.getPercentage().min(new BigDecimal("100")).max(BigDecimal.ZERO).intValue();
         viewModel.setState(new ViewBudgetProgressState(message, bar, false));
         viewModel.notifyStateChanged();

@@ -3,7 +3,9 @@ package view;
 import java.awt.Color;
 import java.awt.Component;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -75,6 +77,13 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
         this.add(messageLabel);
         this.add(buttons);
 
+        for (Component component : getComponents()) {
+            if (component instanceof javax.swing.JComponent) {
+                ((javax.swing.JComponent) component)
+                        .setAlignmentX(Component.CENTER_ALIGNMENT);
+            }
+        }
+
         refreshDate();
     }
 
@@ -98,7 +107,11 @@ public class SetBudgetView extends JPanel implements SetBudgetViewModelListener 
     }
 
     private void refreshDate() {
-        dateLabel.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                "EEEE, MMMM d, yyyy", Locale.ENGLISH);
+
+        dateLabel.setText(
+                LocalDate.now(ZoneOffset.UTC).format(formatter) + " (UTC)");
     }
 
     @Override
